@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#10120f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>AFTERLIGHT | The Puzzle Archive</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+:root{
+ --bg:#10120f;
+ --panel:#191c18;
+ --panel2:#20241e;
+ --line:#30372d;
+ --gold:#d5b66d;
+ --gold2:#f0d99d;
+ --text:#eeeae0;
+ --muted:#898d80;
+ --green:#a5bd91;
+ --red:#d77e72;
+ --tile:#242a22;
+ --tileactive:#353b2e;
+ --shadow:0 18px 60px #0006;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+ background:var(--bg);color:var(--text);
+ font-family:'DM Sans',sans-serif;
+ min-height:100dvh;overflow-x:hidden;
+}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+button:disabled{opacity:.35;cursor:not-allowed}
+::selection{background:var(--gold);color:#151711}
+.app{min-height:100dvh;position:relative;overflow:hidden}
+.ambient{
+ position:fixed;inset:0;pointer-events:none;z-index:-1;
+ background:
+ radial-gradient(ellipse at 50% 0%,#343a2633,transparent 60%),
+ radial-gradient(ellipse at 100% 100%,#c3a25b0a,transparent 45%);
+}
+.noise{
+ position:fixed;inset:0;pointer-events:none;opacity:.035;z-index:10;
+ background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+}
+header{
+ height:72px;padding:0 6%;
+ border-bottom:1px solid #ffffff0c;
+ display:flex;align-items:center;justify-content:space-between;
+ position:relative;z-index:2;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brandmark{
+ width:34px;height:34px;border:1px solid var(--gold);
+ display:grid;place-items:center;position:relative;
+ transform:rotate(45deg);
+}
+.brandmark span{font-family:'Playfair Display';color:var(--gold);font-size:22px;transform:rotate(-45deg)}
+.brandname{font-size:13px;font-weight:800;letter-spacing:3px}
+.brandname small{display:block;color:var(--muted);font-size:8px;letter-spacing:3px;margin-top:3px;font-weight:500}
+.header-right{display:flex;align-items:center;gap:17px}
+.iconbtn{
+ background:transparent;color:var(--muted);padding:10px;
+ display:grid;place-items:center;transition:.2s;
+}
+.iconbtn:hover{color:var(--gold)}
+.iconbtn svg{width:19px;height:19px}
+.header-stat{font-family:'DM Mono';font-size:11px;color:var(--muted)}
+.header-stat b{color:var(--gold);font-weight:500}
+main{max-width:1100px;margin:auto;padding:40px 22px 65px}
+.screen{display:none;animation:appear .45s ease}
+.screen.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{
+ color:var(--gold);font-family:'DM Mono';font-size:10px;
+ letter-spacing:3px;text-transform:uppercase;
+ display:flex;align-items:center;gap:10px;
+}
+.eyebrow:before{content:"";width:22px;height:1px;background:var(--gold)}
+.hero{
+ min-height:420px;display:flex;align-items:center;
+ justify-content:space-between;gap:30px;padding:35px 0 55px;
+}
+.hero-copy{max-width:530px}
+.hero h1{
+ font-family:'Playfair Display',serif;
+ font-size:clamp(48px,9vw,91px);
+ font-weight:500;line-height:.99;
+ letter-spacing:-3px;margin:26px 0 20px;
+}
+.hero h1 em{color:var(--gold);font-weight:500}
+.hero p{font-size:14px;color:var(--muted);line-height:1.9;max-width:420px}
+.hero-buttons{display:flex;align-items:center;gap:12px;margin-top:30px;flex-wrap:wrap}
+.primary{
+ background:var(--gold);color:#181911;padding:15px 25px;
+ font-size:11px;font-weight:800;letter-spacing:1.4px;
+ text-transform:uppercase;transition:.25s;
+ display:inline-flex;align-items:center;gap:14px;
+}
+.primary:hover{background:var(--gold2);transform:translateY(-2px)}
+.secondary{
+ background:transparent;border:1px solid var(--line);
+ color:var(--text);padding:14px 22px;font-size:11px;
+ letter-spacing:1px;text-transform:uppercase;transition:.2s;
+}
+.secondary:hover{border-color:var(--gold);color:var(--gold)}
+.hero-art{
+ width:min(38%,340px);aspect-ratio:1;position:relative;
+ display:grid;place-items:center;flex-shrink:0;
+}
+.art-ring{
+ position:absolute;border:1px solid #c5a65a35;border-radius:50%;
+ width:95%;height:95%;animation:spin 40s linear infinite;
+}
+.art-ring:before,.art-ring:after{
+ content:"";position:absolute;width:7px;height:7px;background:var(--gold);
+ border-radius:50%;top:10%;left:20%;box-shadow:0 0 20px var(--gold);
+}
+.art-ring:after{top:80%;left:80%;width:4px;height:4px}
+.art-ring.inner{width:72%;height:72%;animation-direction:reverse;border-style:dashed;opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+.art-core{
+ width:46%;height:46%;display:grid;place-items:center;
+ border:1px solid var(--gold);position:relative;
+ background:#c6a65b08;
+}
+.art-core svg{width:72%;height:72%;color:var(--gold)}
+.art-label{
+ position:absolute;bottom:2%;font-family:'DM Mono';
+ font-size:9px;letter-spacing:3px;color:var(--muted);
+}
+.hero-stats{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+ margin-bottom:55px;
+}
+.hero-stat{padding:23px 15px;border-right:1px solid var(--line)}
+.hero-stat:last-child{border:0}
+.hero-stat strong{font-family:'Playfair Display';font-size:28px;font-weight:500;color:var(--gold)}
+.hero-stat span{display:block;color:var(--muted);font-size:9px;letter-spacing:1.5px;margin-top:5px;text-transform:uppercase}
+.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:20px;gap:15px}
+.section-head h2{font-family:'Playfair Display';font-size:27px;font-weight:500}
+.section-head p{color:var(--muted);font-size:11px}
+.chapter-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.chapter{
+ min-height:105px;background:var(--panel);
+ border:1px solid var(--line);padding:14px 13px;
+ text-align:left;position:relative;transition:.25s;
+ overflow:hidden;
+}
+.chapter:hover:not(:disabled){border-color:var(--gold);background:#22261e;transform:translateY(-3px)}
+.chapter.current{border-color:var(--gold)}
+.chapter.done{border-color:#657b54}
+.chapter-num{font-family:'DM Mono';font-size:10px;color:var(--gold)}
+.chapter-name{font-size:11px;font-weight:700;margin-top:14px}
+.chapter-state{font-size:9px;color:var(--muted);margin-top:5px}
+.chapter.done .chapter-state{color:var(--green)}
+.chapter:disabled{opacity:.38}
+.chapter.current:after{
+ content:"";position:absolute;width:5px;height:5px;
+ background:var(--gold);border-radius:50%;right:12px;top:16px;
+ box-shadow:0 0 12px var(--gold);
+}
+.footer-note{margin-top:25px;text-align:center;font-size:10px;color:#62665b;letter-spacing:1px}
+
+/* GAME */
+.game-top{
+ display:flex;justify-content:space-between;align-items:center;
+ margin-bottom:30px;gap:12px;
+}
+.back{
+ display:flex;align-items:center;gap:9px;background:transparent;
+ color:var(--muted);font-size:11px;letter-spacing:1px;
+ padding:8px 0;
+}
+.back:hover{color:var(--gold)}
+.game-level{text-align:right}
+.game-level small{display:block;font-family:'DM Mono';font-size:9px;color:var(--muted);letter-spacing:2px}
+.game-level strong{font-family:'Playfair Display';font-size:24px;font-weight:500}
+.progress-track{height:2px;background:#ffffff13;margin:0 0 32px}
+.progress-fill{height:100%;background:var(--gold);width:0;transition:width .4s}
+.game-heading{text-align:center;margin-bottom:25px}
+.game-heading .eyebrow{justify-content:center}
+.game-heading .eyebrow:before{display:none}
+.game-heading h1{
+ font-family:'Playfair Display';font-size:clamp(29px,6vw,43px);
+ font-weight:500;margin:10px 0 8px;
+}
+.game-heading p{color:var(--muted);font-size:12px;line-height:1.7}
+.game-layout{
+ display:grid;grid-template-columns:1fr 245px;
+ gap:28px;align-items:start;max-width:850px;margin:auto;
+}
+.board-wrap{
+ background:var(--panel);border:1px solid var(--line);
+ padding:clamp(12px,3vw,24px);position:relative;
+ box-shadow:var(--shadow);
+}
+.board-wrap:before{
+ content:"";position:absolute;top:-1px;left:20px;width:50px;height:1px;background:var(--gold);
+}
+.board{
+ display:grid;gap:clamp(3px,1vw,7px);
+ width:100%;aspect-ratio:1;
+}
+.tile{
+ min-width:0;min-height:0;position:relative;
+ background:var(--tile);border:1px solid #ffffff09;
+ border-radius:3px;display:grid;place-items:center;
+ transition:background .15s,border-color .15s;
+ touch-action:manipulation;overflow:hidden;
+}
+.tile:active{background:var(--tileactive)}
+.tile:hover{border-color:#c9ab6544}
+.tile svg{width:100%;height:100%;overflow:visible;pointer-events:none}
+.tile .wire{stroke:#555d4d;stroke-width:7;stroke-linecap:round;fill:none;transition:stroke .2s}
+.tile .hub{fill:#555d4d;transition:fill .2s}
+.tile.lit .wire{stroke:var(--gold2);filter:drop-shadow(0 0 4px #e2c47899)}
+.tile.lit .hub{fill:var(--gold2)}
+.tile.source{background:#343426;border-color:#a9945744}
+.tile.target{background:#26332a;border-color:#8eaf8144}
+.tile.target.reached{background:#40503a;border-color:var(--green)}
+.tile.source:after,.tile.target:after{
+ position:absolute;bottom:3px;font-family:'DM Mono';font-size:7px;
+ letter-spacing:1px;color:var(--gold);pointer-events:none;
+}
+.tile.source:after{content:"IN"}
+.tile.target:after{content:"OUT";color:var(--green)}
+.tile.pulse{animation:pulse .6s}
+@keyframes pulse{50%{background:#75653d}}
+.game-sidebar{display:flex;flex-direction:column;gap:13px}
+.info-card{background:var(--panel);border:1px solid var(--line);padding:18px}
+.info-card h3{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:13px}
+.info-card p{font-size:11px;line-height:1.8;color:var(--muted)}
+.info-row{display:flex;justify-content:space-between;margin-top:12px;font-size:11px}
+.info-row span{color:var(--muted)}
+.info-row strong{font-family:'DM Mono';font-weight:400;color:var(--text)}
+.control-btn{
+ width:100%;display:flex;justify-content:space-between;align-items:center;
+ background:var(--panel);border:1px solid var(--line);
+ padding:14px 15px;font-size:11px;color:var(--text);
+ transition:.2s;
+}
+.control-btn:hover{border-color:var(--gold);color:var(--gold)}
+.control-btn span:last-child{color:var(--gold);font-family:'DM Mono'}
+.tip{border-left:2px solid var(--gold);padding:4px 0 4px 12px;font-size:10px;color:var(--muted);line-height:1.8}
+.mobile-actions{display:none}
+.hint-highlight{outline:2px solid var(--gold)!important;box-shadow:0 0 18px #d5b66d66!important}
+.moves{font-family:'DM Mono';font-size:11px;color:var(--gold)}
+/* MODALS */
+.overlay{
+ display:none;position:fixed;inset:0;z-index:20;
+ background:#080a08d9;backdrop-filter:blur(9px);
+ align-items:center;justify-content:center;padding:20px;
+}
+.overlay.show{display:flex;animation:appear .25s}
+.modal{
+ width:min(100%,390px);background:var(--panel);
+ border:1px solid var(--line);padding:32px;
+ text-align:center;position:relative;
+ box-shadow:var(--shadow);
+}
+.modal:before{content:"";height:2px;width:45px;background:var(--gold);position:absolute;top:-1px;left:50%;transform:translateX(-50%)}
+.modal-icon{
+ width:54px;height:54px;border:1px solid var(--gold);
+ margin:0 auto 20px;display:grid;place-items:center;
+ color:var(--gold);font-family:'Playfair Display';font-size:28px;
+}
+.modal h2{font-family:'Playfair Display';font-size:32px;font-weight:500;margin-bottom:9px}
+.modal p{font-size:12px;line-height:1.8;color:var(--muted);margin-bottom:20px}
+.modal .primary{width:100%;justify-content:center;margin-top:7px}
+.modal .secondary{width:100%;margin-top:10px}
+.modal-actions{display:grid;gap:8px}
+.setting-row{
+ display:flex;align-items:center;justify-content:space-between;
+ padding:15px 0;border-bottom:1px solid var(--line);
+ font-size:12px;text-align:left;
+}
+.toggle{width:38px;height:21px;background:#34392f;border-radius:20px;position:relative;transition:.2s}
+.toggle:after{content:"";width:15px;height:15px;background:#858b7c;position:absolute;left:3px;top:3px;border-radius:50%;transition:.2s}
+.toggle.on{background:#8c7847}
+.toggle.on:after{left:20px;background:#f1d898}
+.close-x{position:absolute;right:15px;top:15px;color:var(--muted);background:transparent;font-size:20px}
+.toast{
+ position:fixed;z-index:30;bottom:25px;left:50%;transform:translate(-50%,20px);
+ background:#30372d;border:1px solid #8c8056;color:var(--text);
+ padding:12px 20px;font-size:11px;opacity:0;pointer-events:none;
+ transition:.3s;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* WIN */
+.win-stars{display:flex;justify-content:center;gap:7px;margin:18px 0}
+.win-stars span{font-size:22px;color:var(--gold)}
+.win-score{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+ margin:20px 0;padding:15px 0;
+}
+.win-score strong{display:block;font-family:'Playfair Display';font-size:23px;font-weight:500}
+.win-score small{font-size:8px;color:var(--muted);letter-spacing:1px}
+#completeModal .primary{margin-top:0}
+#completeModal .secondary{margin-top:8px}
+.hidden{display:none!important}
+@media(max-width:720px){
+ header{height:62px;padding:0 17px}
+ main{padding:24px 16px 45px}
+ .hero{min-height:auto;padding:42px 0 37px}
+ .hero-art{width:32%;min-width:105px}
+ .hero h1{font-size:clamp(44px,11vw,70px)}
+ .hero p{font-size:12px}
+ .hero-stats{margin-bottom:40px}
+ .hero-stat{padding:16px 8px}
+ .hero-stat strong{font-size:23px}
+ .chapter-grid{grid-template-columns:repeat(3,1fr);gap:7px}
+ .chapter{min-height:91px;padding:11px}
+ .chapter-name{font-size:10px}
+ .game-layout{grid-template-columns:1fr;gap:13px}
+ .game-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .game-sidebar .info-card:first-child{grid-column:1/-1}
+ .game-sidebar .control-btn{padding:13px 10px}
+ .game-top{margin-bottom:20px}
+ .game-heading{margin-bottom:20px}
+ .mobile-actions{display:flex;gap:9px;margin-top:12px}
+ .mobile-actions button{flex:1}
+}
+@media(max-width:390px){
+ .hero{gap:5px}
+ .hero-art{min-width:85px}
+ .hero h1{font-size:45px}
+ .chapter-grid{grid-template-columns:repeat(2,1fr)}
+ .header-stat{font-size:9px}
+ .game-sidebar{grid-template-columns:1fr 1fr}
+}
+@media(min-width:721px){
+ .game-layout{align-items:center}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="ambient"></div><div class="noise"></div>
+
+<header>
+ <div class="brand">
+  <div class="brandmark"><span>A</span></div>
+  <div class="brandname">AFTERLIGHT<small>THE PUZZLE ARCHIVE</small></div>
+ </div>
+ <div class="header-right">
+  <div class="header-stat">COMPLETED <b id="headerProgress">00 / 50</b></div>
+  <button class="iconbtn" id="settingsBtn" aria-label="Settings">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.7v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2V14h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+ </div>
+</header>
+
+<main>
+<section class="screen active" id="homeScreen">
+ <div class="hero">
+  <div class="hero-copy">
+   <div class="eyebrow">AN ORIGINAL PUZZLE EXPERIENCE</div>
+   <h1>Find the<br><em>Afterlight.</em></h1>
+   <p>Somewhere in the dark, a signal is waiting to be found. Turn the fragments. Connect the light. Unlock the archive.</p>
+   <div class="hero-buttons">
+    <button class="primary" id="continueBtn">CONTINUE <span>→</span></button>
+    <button class="secondary" id="chaptersBtn">EXPLORE LEVELS</button>
+   </div>
+  </div>
+  <div class="hero-art">
+   <div class="art-ring"></div><div class="art-ring inner"></div>
+   <div class="art-core">
+    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+     <path d="M50 9V91M9 50H91M21 21L79 79M79 21L21 79"/>
+     <circle cx="50" cy="50" r="29"/><circle cx="50" cy="50" r="9"/>
+     <path d="M50 0L54 8H46Z" fill="currentColor" stroke="none"/>
+     <path d="M100 50L92 54V46Z" fill="currentColor" stroke="none"/>
+    </svg>
+   </div>
+   <div class="art-label">EST. 001 / THE SIGNAL</div>
+  </div>
+ </div>
+
+ <div class="hero-stats">
+  <div class="hero-stat"><strong>50</strong><span>Unique stages</span></div>
+  <div class="hero-stat"><strong id="homeDone">00</strong><span>Stages completed</span></div>
+  <div class="hero-stat"><strong id="homePercent">0%</strong><span>Archive restored</span></div>
+ </div>
+
+ <div id="chaptersSection">
+  <div class="section-head">
+   <div><div class="eyebrow">THE COLLECTION</div><h2>Choose your chapter</h2></div>
+   <p>01 — 50</p>
+  </div>
+  <div class="chapter-grid" id="chapterGrid"></div>
+ </div>
+ <div class="footer-note">AFTERLIGHT ARCHIVE · AN EXPERIMENT IN LOGIC & LIGHT</div>
+</section>
+
+<section class="screen" id="gameScreen">
+ <div class="game-top">
+  <button class="back" id="backBtn">← <span>ARCHIVE</span></button>
+  <div class="game-level"><small>STAGE <span id="stageNum">01</span> / 50</small><strong id="stageName">First Contact</strong></div>
+ </div>
+ <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+ <div class="game-heading">
+  <div class="eyebrow" id="gameChapter">CHAPTER I · DISCOVERY</div>
+  <h1 id="gameTitle">The First Signal</h1>
+  <p id="gameDescription">Turn the fragments to guide the light from beginning to end.</p>
+ </div>
+
+ <div class="game-layout">
+  <div>
+   <div class="board-wrap">
+    <div class="board" id="board" role="group" aria-label="Puzzle board"></div>
+   </div>
+   <div class="mobile-actions">
+    <button class="secondary" id="mobileHint">USE A HINT</button>
+    <button class="secondary" id="mobileReset">RESTART</button>
+   </div>
+  </div>
+  <aside class="game-sidebar">
+   <div class="info-card">
+    <h3>Mission briefing</h3>
+    <p id="missionText">Connect the entrance to the exit. Tap any fragment to rotate it clockwise. The golden path shows where the signal travels.</p>
+    <div class="info-row"><span>Moves made</span><strong id="moveCount">000</strong></div>
+    <div class="info-row"><span>Board size</span><strong id="boardSize">05 × 05</strong></div>
+    <div class="info-row"><span>Best moves</span><strong id="bestMoves">—</strong></div>
+   </div>
+   <div class="info-card">
+    <h3>How to play</h3>
+    <p>Each tile contains a piece of the signal. Rotate the pieces until their connections form one continuous route.</p>
+   </div>
+   <button class="control-btn" id="hintBtn"><span>Reveal a clue</span><span>✳</span></button>
+   <button class="control-btn" id="resetBtn"><span>Restart stage</span><span>↺</span></button>
+   <div class="tip" id="tipText">A route is only complete when the entrance reaches the exit.</div>
+  </aside>
+ </div>
+</section>
+</main>
+
+<div class="overlay" id="settingsModal">
+ <div class="modal" style="text-align:left">
+  <button class="close-x" data-close="settingsModal">×</button>
+  <div class="eyebrow">PREFERENCES</div>
+  <h2 style="margin-top:15px">Your experience</h2>
+  <div class="setting-row"><span>Sound effects</span><button class="toggle on" id="soundToggle" aria-label="Toggle sound"></button></div>
+  <div class="setting-row"><span>Vibration feedback</span><button class="toggle on" id="vibeToggle" aria-label="Toggle vibration"></button></div>
+  <div class="setting-row"><span>Reduced animations</span><button class="toggle" id="motionToggle" aria-label="Toggle reduced motion"></button></div>
+  <button class="secondary" style="width:100%;margin-top:22px" id="closeSettings">DONE</button>
+ 
+</div>
+</div>
+
+<div class="overlay" id="completeModal">
+  <div class="modal">
+    <div class="modal-icon">✦</div>
+    <div class="eyebrow" style="justify-content:center">SIGNAL RESTORED</div>
+    <h2>Stage complete!</h2>
+    <p>You connected the signal and restored another part of the archive.</p>
+    <div class="win-stars"><span>★</span><span>★</span><span>★</span></div>
+    <div class="win-score">
+      <div><strong id="winMoves">0</strong><small>MOVES</small></div>
+      <div><strong id="winTime">0:00</strong><small>TIME</small></div>
+      <div><strong id="winStage">01</strong><small>STAGE</small></div>
+    </div>
+    <button class="primary" id="nextBtn">NEXT STAGE →</button>
+    <button class="secondary" id="homeAfterWin">BACK TO ARCHIVE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* AFTERLIGHT: MAIN GAME */
+
+const $ = id => document.getElementById(id);
+
+const names = [
+  "First Contact","Quiet Signals","The Crossing","Lost Frequency",
+  "Fragments","The Hidden Route","Echo Chamber","Golden Thread",
+  "The Long Way","New Horizons",
+  "Second Light","The Forgotten Room","Turning Point","Deep Connection",
+  "The Maze","Signal Theory","The Other Side","Broken Patterns",
+  "The Missing Link","A New Dawn",
+  "Faint Whispers","The Observatory","False Paths","The Great Divide",
+  "Hidden in Plain Sight","The Network","Night Signals","The Last Piece",
+  "Beyond the Grid","Into the Unknown",
+  "Shifting Lines","The Secret Passage","The Puzzle Box","Crossroads",
+  "The Silent City","The Final Pattern","Lightkeeper","The Deep Archive",
+  "Unbroken","The Golden Signal",
+  "New Beginnings","The Last Frequency","The Final Crossing",
+  "The Brightest Point","The Great Connection",
+  "Beyond the Darkness","The Last Door","All Together",
+  "The Final Signal","Afterlight"
+];
+
+const chapterNames = [
+  "Discovery","Connections","The Unknown","Revelations","Afterlight"
+];
+
+const chapterRoman = ["I","II","III","IV","V"];
+
+let currentLevel = 1;
+let boardData = [];
+let initialBoard = [];
+let boardSize = 4;
+let moves = 0;
+let startedAt = 0;
+let elapsed = 0;
+let timerHandle = null;
+let finished = false;
+let soundOn = true;
+let vibrationOn = true;
+let reducedMotion = false;
+let completed = [];
+let bestScores = {};
+let toastHandle = null;
+
+try {
+  completed = JSON.parse(localStorage.getItem("afterlight_completed") || "[]");
+  bestScores = JSON.parse(localStorage.getItem("afterlight_best") || "{}");
+} catch(e) {
+  completed = [];
+  bestScores = {};
+}
+
+function saveProgress(){
+  try {
+    localStorage.setItem("afterlight_completed",JSON.stringify(completed));
+    localStorage.setItem("afterlight_best",JSON.stringify(bestScores));
+  } catch(e){}
+}
+
+function pad(n){
+  return String(n).padStart(2,"0");
+}
+
+function showToast(message){
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastHandle);
+  toastHandle = setTimeout(()=>toast.classList.remove("show"),2200);
+}
+
+function vibrate(){
+  if(vibrationOn && navigator.vibrate){
+    navigator.vibrate(18);
+  }
+}
+
+function playSound(frequency){
+  if(!soundOn) return;
+  try{
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if(!AudioContext) return;
+    const audio = new AudioContext();
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+    oscillator.frequency.value = frequency || 420;
+    gain.gain.setValueAtTime(.045,audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);
+    oscillator.start();
+    oscillator.stop(audio.currentTime+.12);
+    oscillator.onended = ()=>audio.close();
+  }catch(e){}
+}
+
+function showScreen(screen){
+  $("homeScreen").classList.toggle("active",screen==="home");
+  $("gameScreen").classList.toggle("active",screen==="game");
+  window.scrollTo(0,0);
+}
+
+function openModal(id){
+  $(id).classList.add("show");
+}
+
+function closeModal(id){
+  $(id).classList.remove("show");
+}
+
+/* LEVEL GENERATION */
+
+function rotatePorts(ports,turns){
+  let result = ports.slice();
+  for(let i=0;i<turns;i++){
+    result = result.map(p=>(p+1)%4);
+  }
+  return result;
+}
+
+function makeLevel(level){
+  boardSize = Math.min(7,4+Math.floor((level-1)/10));
+  const n = boardSize;
+  const total = n*n;
+  const grid = Array.from({length:total},()=>({
+    ports:[],
+    solution:[],
+    turns:0,
+    path:false
+  }));
+
+  const path = [];
+  let row = Math.floor(n/2);
+  let col = 0;
+  path.push([row,col]);
+
+  for(let x=0;x<n-1;x++){
+    let nextRow = row;
+
+    if(level > 2 && x < n-2){
+      const direction = Math.random() < .5 ? -1 : 1;
+      nextRow = Math.max(0,Math.min(n-1,row+direction));
+    }
+
+    while(row !== nextRow){
+      row += row < nextRow ? 1 : -1;
+      path.push([row,x]);
+    }
+
+    col = x+1;
+    path.push([row,col]);
+  }
+
+  function directionBetween(a,b){
+    const dr = b[0]-a[0];
+    const dc = b[1]-a[1];
+    if(dr===-1) return 0;
+    if(dc===1) return 1;
+    if(dr===1) return 2;
+    return 3;
+  }
+
+  path.forEach((point,index)=>{
+    const r=point[0], c=point[1];
+    const ports=[];
+
+    if(index===0){
+      ports.push(3,directionBetween(point,path[index+1]));
+    }else if(index===path.length-1){
+      ports.push(directionBetween(point,path[index-1]),1);
+    }else{
+      ports.push(directionBetween(point,path[index-1]));
+      ports.push(directionBetween(point,path[index+1]));
+    }
+
+    const tile=grid[r*n+c];
+    tile.solution=ports.slice().sort((a,b)=>a-b);
+    tile.path=true;
+
+    const turns=Math.floor(Math.random()*4);
+    tile.turns=turns;
+    tile.ports=rotatePorts(tile.solution,turns).sort((a,b)=>a-b);
+  });
+
+  // Add harmless-looking spare fragments.
+  grid.forEach(tile=>{
+    if(!tile.path){
+      const first=Math.floor(Math.random()*4);
+      const second=(first+1+Math.floor(Math.random()*3))%4;
+      tile.solution=[first,second].sort((a,b)=>a-b);
+      const turns=Math.floor(Math.random()*4);
+      tile.turns=turns;
+      tile.ports=rotatePorts(tile.solution,turns).sort((a,b)=>a-b);
+    }
+  });
+
+  return grid;
+}
+
+/* BOARD DISPLAY */
+
+function tileSVG(ports){
+  const positions=[
+    [50,0,50,50],
+    [100,50,50,50],
+    [50,100,50,50],
+    [0,50,50,50]
+  ];
+
+  let lines="";
+  ports.forEach(p=>{
+    const v=positions[p];
+    lines += '<line class="wire" x1="'+v[0]+'" y1="'+v[1]+'" x2="'+v[2]+'" y2="'+v[3]+'"></line>';
+  });
+
+  return '<svg viewBox="0 0 100 100" aria-hidden="true">'+
+    lines+'<circle class="hub" cx="50" cy="50" r="8"></circle></svg>';
+}
+
+function renderBoard(){
+  const board=$("board");
+  board.innerHTML="";
+  board.style.gridTemplateColumns="repeat("+boardSize+",1fr)";
+
+  boardData.forEach((tile,index)=>{
+    const button=document.createElement("button");
+    const row=Math.floor(index/boardSize);
+    const col=index%boardSize;
+
+    button.type="button";
+    button.className="tile";
+    button.setAttribute("aria-label","Rotate tile "+(index+1));
+
+    if(row===Math.floor(boardSize/2) && col===0){
+      button.classList.add("source");
+    }
+
+    if(col===boardSize-1 && row===targetRow()){
+      button.classList.add("target");
+    }
+
+    button.innerHTML=tileSVG(tile.ports);
+
+    button.addEventListener("click",function(){
+      rotateTile(index);
+    });
+
+    board.appendChild(button);
+  });
+
+  updateSignal();
+}
+
+function targetRow(){
+  const last=boardData.length-1;
+  for(let i=last;i>=0;i--){
+    if(boardData[i].path && i%boardSize===boardSize-1){
+      return Math.floor(i/boardSize);
+    }
+  }
+  return Math.floor(boardSize/2);
+}
+
+function getConnected(){
+  const n=boardSize;
+  const visited=new Set();
+  const queue=[];
+  const start=Math.floor(n/2)*n;
+
+  queue.push(start);
+  visited.add(start);
+
+  const directions=[
+    [-1,0,0,2],
+    [0,1,1,3],
+    [1,0,2,0],
+    [0,-1,3,1]
+  ];
+
+  while(queue.length){
+    const index=queue.shift();
+    const r=Math.floor(index/n);
+    const c=index%n;
+    const ports=boardData[index].ports;
+
+    directions.forEach(d=>{
+      const nr=r+d[0], nc=c+d[1];
+      if(nr<0 || nr>=n || nc<0 || nc>=n) return;
+      if(!ports.includes(d[2])) return;
+
+      const next=nr*n+nc;
+      if(!boardData[next].ports.includes(d[3])) return;
+
+      if(!visited.has(next)){
+        visited.add(next);
+        queue.push(next);
+      }
+    });
+  }
+
+  return visited;
+}
+
+function updateSignal(){
+  const connected=getConnected();
+  const tiles=$("board").children;
+
+  for(let i=0;i<tiles.length;i++){
+    tiles[i].classList.toggle("lit",connected.has(i));
+  }
+
+  const targetIndex=targetRow()*boardSize+(boardSize-1);
+  const target=tiles[targetIndex];
+
+  if(target) target.classList.toggle("reached",connected.has(targetIndex));
+
+  if(connected.has(targetIndex) && !finished){
+    completeStage();
+  }
+}
+
+function rotateTile(index){
+  if(finished) return;
+
+  const tile=boardData[index];
+  tile.ports=rotatePorts(tile.ports,1).sort((a,b)=>a-b);
+  tile.turns=(tile.turns+1)%4;
+  moves++;
+
+  const button=$("board").children[index];
+  button.innerHTML=tileSVG(tile.ports);
+  $("moveCount").textContent=pad(moves);
+
+  playSound(390);
+  vibrate();
+  updateSignal();
+}
+
+/* STAGE INFORMATION */
+
+function loadLevel(level){
+  currentLevel=Math.max(1,Math.min(50,level));
+  finished=false;
+  moves=0;
+  elapsed=0;
+  clearInterval(timerHandle);
+
+  boardData=makeLevel(currentLevel);
+  initialBoard=JSON.parse(JSON.stringify(boardData));
+
+  const chapter=Math.floor((currentLevel-1)/10);
+  const stageName=names[currentLevel-1];
+
+  $("stageNum").textContent=pad(currentLevel);
+  $("stageName").textContent=stageName;
+  $("gameTitle").textContent=stageName;
+  $("gameChapter").textContent="CHAPTER "+chapterRoman[chapter]+" · "+chapterNames[chapter].toUpperCase();
+  $("gameDescription").textContent="Turn the fragments to guide the light from beginning to end.";
+  $("missionText").textContent="Connect the entrance to the exit. Tap any fragment to rotate it clockwise. The golden path shows where the signal travels.";
+  $("moveCount").textContent="000";
+  $("boardSize").textContent=boardSize+" × "+boardSize;
+  $("bestMoves").textContent=bestScores[currentLevel] || "—";
+  $("progressFill").style.width=(completed.length/50*100)+"%";
+  $("tipText").textContent="A route is only complete when the entrance reaches the exit.";
+
+  renderBoard();
+  startedAt=Date.now();
+
+  timerHandle=setInterval(()=>{
+    if(!finished){
+      elapsed=Math.floor((Date.now()-startedAt)/1000);
+    }
+  },1000);
+
+  showScreen("game");
+}
+
+function formatTime(seconds){
+  const m=Math.floor(seconds/60);
+  const s=seconds%60;
+  return m+":"+String(s).padStart(2,"0");
+}
+
+function completeStage(){
+  finished=true;
+  clearInterval(timerHandle);
+
+  if(!completed.includes(currentLevel)){
+    completed.push(currentLevel);
+  }
+
+  if(!bestScores[currentLevel] || moves<bestScores[currentLevel]){
+    bestScores[currentLevel]=moves;
+  }
+
+  saveProgress();
+  updateHome();
+
+  $("winMoves").textContent=moves;
+  $("winTime").textContent=formatTime(elapsed);
+  $("winStage").textContent=pad(currentLevel);
+  $("nextBtn").textContent=currentLevel===50 ? "FINISH ARCHIVE ✦" : "NEXT STAGE →";
+
+  playSound(650);
+  vibrate();
+  setTimeout(()=>openModal("completeModal"),350);
+}
+
+/* HINTS AND RESET */
+
+function useHint(){
+  if(finished) return;
+
+  const wrong=[];
+  boardData.forEach((tile,index)=>{
+    const a=tile.ports.slice().sort().join(",");
+    const b=tile.solution.slice().sort().join(",");
+    if(a!==b && tile.path) wrong.push(index);
+  });
+
+  if(!wrong.length){
+    showToast("The signal is almost connected!");
+    return;
+  }
+
+  const index=wrong[Math.floor(Math.random()*wrong.length)];
+  const button=$("board").children[index];
+
+  button.classList.add("hint-highlight");
+  setTimeout(()=>button.classList.remove("hint-highlight"),1500);
+  showToast("Look closely at the highlighted fragment.");
+  vibrate();
+}
+
+function resetLevel(){
+  if(finished) return;
+  boardData=JSON.parse(JSON.stringify(initialBoard));
+  moves=0;
+  $("moveCount").textContent="000";
+  renderBoard();
+  showToast("Stage restarted.");
+}
+
+/* HOME AND CHAPTERS */
+
+function updateHome(){
+  const count=completed.length;
+  $("headerProgress").textContent=pad(count)+" / 50";
+  $("homeDone").textContent=pad(count);
+  $("homePercent").textContent=Math.round(count/50*100)+"%";
+
+  const next= Math.min(50,Math.max(1,count+1));
+  $("continueBtn").innerHTML="CONTINUE <span>→</span>";
+
+  const grid=$("chapterGrid");
+  grid.innerHTML="";
+
+  for(let chapter=0;chapter<5;chapter++){
+    const start=chapter*10+1;
+    const end=start+9;
+    const done=completed.filter(v=>v>=start && v<=end).length;
+    const unlocked=start<=count+1 || chapter===0;
+
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="chapter";
+    if(done===10) button.classList.add("done");
+    if(unlocked && done<10) button.classList.add("current");
+    button.disabled=!unlocked;
+
+    button.innerHTML=
+      '<div class="chapter-num">CHAPTER 0'+(chapter+1)+'</div>'+
+      '<div class="chapter-name">'+chapterNames[chapter]+'</div>'+
+      '<div class="chapter-state">'+done+'/10 RESTORED</div>';
+
+    button.addEventListener("click",()=>loadLevel(start));
+    grid.appendChild(button);
+  }
+}
+
+/* SETTINGS */
+
+$("settingsBtn").addEventListener("click",()=>openModal("settingsModal"));
+$("closeSettings").addEventListener("click",()=>closeModal("settingsModal"));
+
+document.querySelectorAll("[data-close]").forEach(button=>{
+  button.addEventListener("click",()=>{
+    closeModal(button.getAttribute("data-close"));
+  });
+});
+
+function setupToggle(id,callback,initial){
+  const button=$(id);
+  button.classList.toggle("on",initial);
+  button.addEventListener("click",()=>{
+    const active=button.classList.toggle("on");
+    callback(active);
+  });
+}
+
+setupToggle("soundToggle",v=>soundOn=v,true);
+setupToggle("vibeToggle",v=>vibrationOn=v,true);
+setupToggle("motionToggle",v=>{
+  reducedMotion=v;
+  document.body.style.setProperty("--animation-speed",v?"0s":".45s");
+},false);
+
+/* BUTTONS */
+
+$("continueBtn").addEventListener("click",()=>{
+  let next=1;
+  while(completed.includes(next) && next<50) next++;
+  loadLevel(next);
+});
+
+$("chaptersBtn").addEventListener("click",()=>{
+  $("chaptersSection").scrollIntoView({behavior:"smooth"});
+});
+
+$("backBtn").addEventListener("click",()=>{
+  clearInterval(timerHandle);
+  showScreen("home");
+  updateHome();
+});
+
+$("hintBtn").addEventListener("click",useHint);
+$("mobileHint").addEventListener("click",useHint);
+$("resetBtn").addEventListener("click",resetLevel);
+$("mobileReset").addEventListener("click",resetLevel);
+
+$("nextBtn").addEventListener("click",()=>{
+  closeModal("completeModal");
+  if(currentLevel<50){
+    loadLevel(currentLevel+1);
+  }else{
+    showScreen("home");
+    showToast("You restored the entire archive!");
+  }
+});
+
+$("homeAfterWin").addEventListener("click",()=>{
+  closeModal("completeModal");
+  showScreen("home");
+  updateHome();
+});
+
+/* CLOSE MODALS WHEN BACKGROUND IS TAPPED */
+
+["settingsModal","completeModal"].forEach(id=>{
+  $(id).addEventListener("click",event=>{
+    if(event.target===$(id) && id==="settingsModal"){
+      closeModal(id);
+    }
+  });
+});
+
+/* START */
+
+updateHome();
+showScreen("home");
+
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js").catch(function (error) {
+      console.log("Offline support could not be registered:", error);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
